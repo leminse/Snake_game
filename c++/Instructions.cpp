@@ -1,6 +1,9 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
+// 외부에 정의된 함수 선언. game.cpp에 존재
+void startGame();           // 게임 시작 함수
+
 void showDescription() {
     // 창 크기 및 제목 설정
     sf::RenderWindow window(sf::VideoMode(606, 495), "Snake Game");
@@ -35,12 +38,24 @@ void showDescription() {
             if (event.type == sf::Event::Closed)
                 window.close();
 
+            if (event.type == sf::Event::MouseButtonPressed) {  // 마우스 클릭 이벤트
+                if (event.mouseButton.button == sf::Mouse::Left) {  // 왼쪽 버튼 클릭
+                    sf::Vector2i mousePos = sf::Mouse::getPosition(window);  // 마우스 좌표 가져오기
 
-    // 화면 그리기
-    window.clear();                       // 이전 화면 지우기
-    window.draw(backgroundSprite);        // 배경 이미지 그리기
-    window.draw(startButton);             // 시작 버튼 그리기
-    window.draw(startButtonText);         // 시작 버튼 텍스트 그리기
-    window.display();                       // 디스플레이 업데이트
-    }   
+                    // 시작 버튼 클릭 처리
+                    if (startButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                        window.close();  // 현재 창 닫기
+                        startGame();     // 외부 함수 호출 (게임 시작)
+                    }
+                }
+            }
+        }
+
+        // 화면 그리기
+        window.clear();                       // 이전 화면 지우기
+        window.draw(backgroundSprite);        // 배경 이미지 그리기
+        window.draw(startButton);             // 시작 버튼 그리기
+        window.draw(startButtonText);         // 시작 버튼 텍스트 그리기
+        window.display();                       // 디스플레이 업데이트
+    }
 }
