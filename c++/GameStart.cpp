@@ -1,9 +1,15 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
+#include <vector>
+#include <random>
 
+void main();
+
+
+// °ÔÀÓ ½ÃÀÛ ·ÎÁ÷À» Æ÷ÇÔÇÏ´Â ÇÔ¼ö
 void startGame() {
-    // Ã¢ Å©±â ¹× Á¦¸ñ ¼³Á¤
-    sf::RenderWindow window(sf::VideoMode(606, 495), "Snake Game");
+    // °ÔÀÓ Ã¢ Å©±â¿Í Á¦¸ñ ¼³Á¤
+    sf::RenderWindow window(sf::VideoMode(906, 795), "Snake Game");
 
     // ¹è°æ ÀÌ¹ÌÁö ·Îµå ¹× ÅØ½ºÃ³ ¼³Á¤
     sf::Texture backgroundTexture;
@@ -12,27 +18,160 @@ void startGame() {
     }
     sf::Sprite backgroundSprite(backgroundTexture);  // ¹è°æ ÀÌ¹ÌÁö¸¦ ½ºÇÁ¶óÀÌÆ®·Î º¯È¯
 
-    // ÆùÆ® ·Îµå
+    // ÆùÆ® ·Îµå ¹× ¼³Á¤
     sf::Font font;
     if (!font.loadFromFile("C:/Users/lmslh/source/repos/c++/font_/yangjinche.otf")) {
-        return;  // ÆùÆ® ·Îµå ½ÇÆÐ ½Ã ÇÔ¼ö Á¾·á
+        return;  // ÆùÆ® ÆÄÀÏÀ» Ã£Áö ¸øÇÏ¸é ÇÁ·Î±×·¥ Á¾·á
     }
 
-    // ÀÌº¥Æ® ·çÇÁ
+    // °ÔÀÓ »óÅÂ º¯¼ö ÃÊ±âÈ­
+    const int width = 20;
+    const int height = 15;
+    const int tileSize = 30;
+    bool gameOver = false;
+    int x = width / 2, y = height / 2, fruitX, fruitY, score = 0;
+    std::vector<sf::Vector2i> tail;
+    enum eDirection { STOP = 0, LEFT, RIGHT, UP, DOWN };
+    eDirection dir = STOP;
+
+    // ¸ÔÀÌÀÇ ÃÊ±â À§Ä¡ ¼³Á¤
+    fruitX = rand() % width;
+    fruitY = rand() % height;
+
+    // °ÔÀÓ È­¸é ±×¸®±â
+    sf::RectangleShape tile(sf::Vector2f(tileSize, tileSize)); // °¢ Å¸ÀÏ Å©±â ¼³Á¤
+    sf::Texture appleTexture;
+    appleTexture.loadFromFile("C:/Users/lmslh/source/repos/c++/images/»ç°ú.png");
+    sf::Texture chickTexture;
+    chickTexture.loadFromFile("C:/Users/lmslh/source/repos/c++/images/º´¾Æ¸®.png");
+    sf::Texture mouseTexture;
+    mouseTexture.loadFromFile("C:/Users/lmslh/source/repos/c++/images/Áã.png");
+    sf::Sprite fruitSprite;
+
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
+            if (event.type == sf::Event::Closed) {
                 window.close();
+            }
         }
 
-        // í™”ë©´ ê·¸ë¦¬ê¸°
-        window.clear();
-        window.draw(backgroundSprite);
-        window.display();
+        // °ÔÀÓ ·ÎÁ÷ ¹× ÀÔ·Â Ã³¸®
+        if (!gameOver) {
+            // »ç¿ëÀÚ ÀÔ·Â (¹æÇâÅ°·Î ¹ì ÀÌµ¿)
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) dir = LEFT;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) dir = RIGHT;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) dir = UP;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) dir = DOWN;
+
+            // ¹ì ÀÌµ¿ ¹× °ÔÀÓ ·ÎÁ÷
+            sf::Vector2i prev(x, y);
+            sf::Vector2i prev2;
+            for (size_t i = 0; i < tail.size(); i++) {
+                prev2 = tail[i];
+                tail[i] = prev;
+                prev = prev2;
+            }
+
+            switch (dir) {
+            case LEFT: x--; break;
+            case RIGHT: x++; break;
+            case UP: y--; break;
+            case DOWN: y++; break;
+            default: break;
+            }
+
+            // º® Ãæµ¹ °Ë»ç
+            if (x < 0 || x >= width || y < 0 || y >= height) {
+                gameOver = true;
+            }
+
+            // ÀÚ±â ÀÚ½Å°ú Ãæµ¹ °Ë»ç
+            for (auto& segment : tail) {
+                if (segment.x == x && segment.y == y) {
+                    gameOver = true;
+                }
+            }
+
+            // ¸ÔÀÌ ¸Ô±â Ã³¸®
+            if (x == fruitX && y == fruitY) {
+                score += 1;
+                tail.push_back(sf::Vector2i(x, y));
+                fruitX = rand() % width;
+                fruitY = rand() % height;
+            }
+
+            // °ÔÀÓ È­¸é ±×¸®±â
+            window.clear();
+
+            // ¹è°æ ±×¸®±â
+            window.draw(backgroundSprite);  // ¹è°æÀ» ¸ÕÀú ±×¸®±â
+
+            // ¸Ê ±×¸®±â
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    tile.setPosition(i * tileSize, j * tileSize);
+                    tile.setFillColor(sf::Color(50, 50, 50));
+                    window.draw(tile);
+                }
+            }
+
+            // ¹ì ¸Ó¸® ±×¸®±â
+            tile.setPosition(x * tileSize, y * tileSize);
+            tile.setFillColor(sf::Color::Green);
+            window.draw(tile);
+
+            // ¹ì ²¿¸® ±×¸®±â
+            for (auto& segment : tail) {
+                tile.setPosition(segment.x * tileSize, segment.y * tileSize);
+                tile.setFillColor(sf::Color(0, 128, 0));
+                window.draw(tile);
+            }
+
+            // ¸ÔÀÌ ±×¸®±â
+            fruitSprite.setTexture(appleTexture);
+            fruitSprite.setPosition(fruitX * tileSize, fruitY * tileSize);
+            window.draw(fruitSprite);
+
+            // Á¡¼ö Ç¥½Ã
+            sf::Text scoreText("Á¡¼ö: " + std::to_string(score), font, 20);
+            scoreText.setFillColor(sf::Color::White);
+            scoreText.setPosition(10, 10);
+            window.draw(scoreText);
+
+            window.display();
+        }
+        else {
+            window.clear();
+            sf::Text gameOverText("Game Over! Final Score: " + std::to_string(score), font, 30);
+            gameOverText.setFillColor(sf::Color::White);
+            gameOverText.setPosition(width * tileSize / 4, height * tileSize / 2);
+
+            // ½ÃÀÛ ¹öÆ° »ý¼º: Å©±â, »ö»ó, À§Ä¡ ¼³Á¤
+            sf::RectangleShape firstButton(sf::Vector2f(200, 50));
+            firstButton.setFillColor(sf::Color(92, 112, 94));  // ³ì»ö °è¿­
+            firstButton.setPosition(500, 570);                // (x, y) À§Ä¡
+            // ½ÃÀÛ ¹öÆ° ÅØ½ºÆ® »ý¼º ¹× ¼³Á¤
+            sf::Text firstButtonText(L"Ã³À½À¸·Î", font, 30);
+            firstButtonText.setFillColor(sf::Color::White);  // ÇÏ¾á»ö ÅØ½ºÆ®
+            firstButtonText.setPosition(545, 577);          // ÅØ½ºÆ® À§Ä¡ Á¶Á¤
+
+            if (event.type == sf::Event::MouseButtonPressed) {  // ¸¶¿ì½º Å¬¸¯ ÀÌº¥Æ®
+                if (event.mouseButton.button == sf::Mouse::Left) {  // ¿ÞÂÊ ¹öÆ° Å¬¸¯
+                    sf::Vector2i mousePos = sf::Mouse::getPosition(window);  // ¸¶¿ì½º ÁÂÇ¥ °¡Á®¿À±â
+
+                    // ½ÃÀÛ ¹öÆ° Å¬¸¯ Ã³¸®
+                    if (firstButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                        window.close();  // ÇöÀç Ã¢ ´Ý±â
+                        main();     // ¿ÜºÎ ÇÔ¼ö È£Ãâ 
+                    }
+                }
+            }
+            window.draw(gameOverText);
+            window.draw(firstButton);
+            window.draw(firstButtonText);
+            window.display();
+        }
     }
-    // È­¸é ±×¸®±â
-    window.clear();                       // ÀÌÀü È­¸é Áö¿ì±â
-    window.draw(backgroundSprite);        // ¹è°æ ÀÌ¹ÌÁö ±×¸®±â
-    window.display();                     // µð½ºÇÃ·¹ÀÌ ¾÷µ¥ÀÌÆ®
+
 }

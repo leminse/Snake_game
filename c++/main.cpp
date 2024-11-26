@@ -7,7 +7,7 @@ void showDescription();   // 게임 설명 함수
 
 int main() {
     // 창 크기 설정: 606x495 크기의 윈도우 창 생성, 제목: Snake Game
-    sf::RenderWindow window(sf::VideoMode(606, 495), "Snake Game");
+    sf::RenderWindow window(sf::VideoMode(906, 795), "Snake Game");
 
     // 배경 이미지 로드 및 텍스처 설정
     sf::Texture backgroundTexture;
@@ -25,22 +25,22 @@ int main() {
     // 시작 버튼 생성: 크기, 색상, 위치 설정
     sf::RectangleShape startButton(sf::Vector2f(200, 50));
     startButton.setFillColor(sf::Color(92, 112, 94));  // 녹색 계열
-    startButton.setPosition(200, 270);                // (x, y) 위치
+    startButton.setPosition(500, 570);                // (x, y) 위치
 
     // 시작 버튼 텍스트 생성 및 설정
     sf::Text startButtonText(L"게임 시작", font, 30);
     startButtonText.setFillColor(sf::Color::White);  // 하얀색 텍스트
-    startButtonText.setPosition(245, 277);          // 텍스트 위치 조정
+    startButtonText.setPosition(545, 577);          // 텍스트 위치 조정
 
     // 게임 설명 버튼 생성: 크기, 색상, 위치 설정
     sf::RectangleShape instructionsButton(sf::Vector2f(200, 50));
     instructionsButton.setFillColor(sf::Color(92, 112, 94));  // 녹색 계열
-    instructionsButton.setPosition(200, 334);                // (x, y) 위치
+    instructionsButton.setPosition(500, 634);                // (x, y) 위치
 
     // 게임 설명 버튼 텍스트 생성 및 설정
     sf::Text instructionsButtonText(L"게임 방법", font, 30);
     instructionsButtonText.setFillColor(sf::Color::White);  // 하얀색 텍스트
-    instructionsButtonText.setPosition(245, 341);          // 텍스트 위치 조정
+    instructionsButtonText.setPosition(545, 641);          // 텍스트 위치 조정
 
     // 창이 열려 있는 동안 실행되는 메인 루프
     while (window.isOpen()) {
