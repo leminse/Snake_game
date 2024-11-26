@@ -25,6 +25,11 @@ void startGame() {
             if (event.type == sf::Event::Closed)
                 window.close();
         }
+
+        // í™”ë©´ ê·¸ë¦¬ê¸°
+        window.clear();
+        window.draw(backgroundSprite);
+        window.display();
     }
     // È­¸é ±×¸®±â
     window.clear();                       // ÀÌÀü È­¸é Áö¿ì±â
