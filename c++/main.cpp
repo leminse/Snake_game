@@ -11,7 +11,7 @@ int main() {
 
     // 배경 이미지 로드 및 텍스처 설정
     sf::Texture backgroundTexture;
-    if (!backgroundTexture.loadFromFile("C:/Users/lmslh/source/repos/c++/images/처음화면.png")) {
+    if (!backgroundTexture.loadFromFile("C:/Users/lmslh/source/repos/c++/images/처음 화면.png")) {
         return -1;  // 배경 이미지 파일을 찾지 못하면 프로그램 종료
     }
     sf::Sprite backgroundSprite(backgroundTexture);  // 배경 이미지를 스프라이트로 변환
@@ -23,24 +23,24 @@ int main() {
     }
 
     // 시작 버튼 생성: 크기, 색상, 위치 설정
-    sf::RectangleShape startButton(sf::Vector2f(200, 50));
+    sf::RectangleShape startButton(sf::Vector2f(250, 60));
     startButton.setFillColor(sf::Color(92, 112, 94));  // 녹색 계열
-    startButton.setPosition(500, 570);                // (x, y) 위치
+    startButton.setPosition(340, 470);                // (x, y) 위치
 
     // 시작 버튼 텍스트 생성 및 설정
-    sf::Text startButtonText(L"게임 시작", font, 30);
+    sf::Text startButtonText(L"게임 시작", font, 40);
     startButtonText.setFillColor(sf::Color::White);  // 하얀색 텍스트
-    startButtonText.setPosition(545, 577);          // 텍스트 위치 조정
+    startButtonText.setPosition(390, 475);          // 텍스트 위치 조정
 
     // 게임 설명 버튼 생성: 크기, 색상, 위치 설정
-    sf::RectangleShape instructionsButton(sf::Vector2f(200, 50));
+    sf::RectangleShape instructionsButton(sf::Vector2f(250, 60));
     instructionsButton.setFillColor(sf::Color(92, 112, 94));  // 녹색 계열
-    instructionsButton.setPosition(500, 634);                // (x, y) 위치
+    instructionsButton.setPosition(340, 554);                // (x, y) 위치 숫자가 커질수록 아래
 
     // 게임 설명 버튼 텍스트 생성 및 설정
-    sf::Text instructionsButtonText(L"게임 방법", font, 30);
+    sf::Text instructionsButtonText(L"게임 방법", font, 40);
     instructionsButtonText.setFillColor(sf::Color::White);  // 하얀색 텍스트
-    instructionsButtonText.setPosition(545, 641);          // 텍스트 위치 조정
+    instructionsButtonText.setPosition(390, 561);          // 텍스트 위치 조정
 
     // 창이 열려 있는 동안 실행되는 메인 루프
     while (window.isOpen()) {
