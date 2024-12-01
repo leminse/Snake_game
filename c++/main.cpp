@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
+
 void startGame();         // 게임 시작 함수
 void showDescription();   // 게임 설명 함수
 
