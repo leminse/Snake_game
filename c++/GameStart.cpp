@@ -65,6 +65,7 @@ void startGame() {
     sf::Clock clock;			  // SFML Clock 객체로 시간 측정
     bool gameover = false;		  // 게임 종료 플래그 초기화
     int score = 0;				  // 게임 점수 초기화
+    float effectTimer = 0.f;	  // 쥐, 병아리 효과 지속 시간을 측정하기 위한 타이머
 
     Prey prey;									// prey 구조체 생성
     prey.sprite.setTexture(appleTexture);		// 초기 먹이 타입은 "apple"
@@ -93,56 +94,114 @@ void startGame() {
             }
         }
 
-        direction = nextDirection;  // 실제로 이동할 방향 설정
+        if (gameover) {			// 게임 오버일 경우
+            window.clear();		//새로 그리기 전에 화면을 지워서 초기화
+            // 게임 오버 텍스트
+            sf::Text gameOverText("Game Over!", font, 40);
+            gameOverText.setFillColor(sf::Color::White);
+            gameOverText.setPosition(width / 2.f - 100, 561);
 
-        // 뱀의 머리 위치 업데이트
-        sf::Vector2f nextPosition = snakeHead.getPosition();
-        if (direction == UP) nextPosition.y -= GRID_SIZE.y;   // 위로 이동
-        if (direction == DOWN) nextPosition.y += GRID_SIZE.y; // 아래로 이동
-        if (direction == LEFT) nextPosition.x -= GRID_SIZE.x; // 왼쪽으로 이동
-        if (direction == RIGHT) nextPosition.x += GRID_SIZE.x; // 오른쪽으로 이동
+            sf::Text gameOverScoreText("score : " + std::to_string(score), font, 40);
+            gameOverScoreText.setFillColor(sf::Color::White);
+            gameOverScoreText.setPosition(width / 2.f - 100, 600);
 
-        // 뱀 머리 위치 업데이트
-        snakeHead.setPosition(nextPosition);  // 계산된 새로운 위치로 뱀 머리 이동
+            window.draw(gameOverText);
+            window.draw(gameOverScoreText);
+            window.display();
+            continue;  // 게임 오버 시 루프의 나머지 코드를 건너뛰고 새로 시작
+        }//gameover
 
-        // 먹이와의 충돌 체크
-        if (snakeHead.getGlobalBounds().intersects(prey.sprite.getGlobalBounds())) {
-            // 뱀 머리와 먹이의 충돌을 검사
-            if (prey.type == "apple") {  // 사과 먹이를 먹으면
-                score += 1;  // 점수 증가
-                sf::Sprite newSegment(snakeBodyTexture);  // 새로운 몸통 생성
-                if (!snakeBody.empty()) newSegment.setPosition(snakeBody.back().getPosition());  // 몸통 뒤에 위치
-                else newSegment.setPosition(snakeHead.getPosition());  // 처음엔 머리 위치에 몸통 추가
-                snakeBody.push_back(newSegment);  // 뱀 몸통에 새로 생성된 몸통 추가
+        float deltaTime = clock.restart().asSeconds();  // clock.restart(): 시계를 재설정하고, 이전 시점부터의 경과 시간을 초 단위로 반환.
+        timer += deltaTime;  // 게임의 이동 타이머를 업데이트하기 위한 코드. 뱀이 주어진 속도로 이동할 수 있도록 프레임 간의 시간을 측정
+        if (effectTimer > 0.f) effectTimer -= deltaTime;  // 특수 효과 타이머 감소
+
+        if (timer > 1.f / speed) {  // 이동 주기가 설정한 속도에 맞춰서 실행
+            timer = 0.f;  // 타이머 초기화
+
+            direction = nextDirection;  // 실제로 이동할 방향 설정
+
+            // 뱀의 머리 위치 업데이트
+            sf::Vector2f nextPosition = snakeHead.getPosition();
+            if (direction == UP) nextPosition.y -= GRID_SIZE.y;   // 위로 이동
+            if (direction == DOWN) nextPosition.y += GRID_SIZE.y; // 아래로 이동
+            if (direction == LEFT) nextPosition.x -= GRID_SIZE.x; // 왼쪽으로 이동
+            if (direction == RIGHT) nextPosition.x += GRID_SIZE.x; // 오른쪽으로 이동
+
+            // 벽에 충돌했을 때 게임 오버 처리
+            if (nextPosition.x < 0 || nextPosition.x >= width || nextPosition.y < 0 || nextPosition.y >= height) {
+                gameover = true;  // 벽에 닿으면 게임 종료
+                continue;  // 나머지 코드 실행을 건너뛰고 게임 오버 처리
             }
-            else if (prey.type == "chick") {  // 병아리 먹이를 먹으면
-                score += 1;  // 점수 증가
+
+            // 뱀이 자기 몸에 충돌했을 때 게임 오버 처리
+            for (const auto& segment : snakeBody) {
+                if (segment.getPosition() == nextPosition) {  // 뱀의 몸통과 머리가 충돌
+                    gameover = true;  // 자기 몸에 닿으면 게임 종료
+                    continue;
+                }
             }
-            else if (prey.type == "mouse") {  // 쥐 먹이를 먹으면
-                score += 2;  // 점수 2점 증가
-                sf::Sprite newSegment(snakeBodyTexture);  // 새로운 몸통 생성
-                if (!snakeBody.empty()) newSegment.setPosition(snakeBody.back().getPosition());  // 몸통 뒤에 위치
-                else newSegment.setPosition(snakeHead.getPosition());  // 처음엔 머리 위치에 몸통 추가
-                snakeBody.push_back(newSegment);  // 뱀 몸통에 새로 생성된 몸통 추가
+
+            // 뱀 몸통 업데이트 (몸통이 추가되면 앞에 추가, 끝은 삭제)
+            if (!snakeBody.empty()) {
+                snakeBody.push_front(snakeHead);  // 뱀 머리를 몸통 앞에 추가
+                snakeBody.pop_back();  // 마지막 몸통을 제거하여 길이를 유지
             }
+
+            // 뱀 머리 위치 업데이트
+            snakeHead.setPosition(nextPosition);  // 계산된 새로운 위치로 뱀 머리 이동
+
+            // 먹이와의 충돌 체크
+            if (snakeHead.getGlobalBounds().intersects(prey.sprite.getGlobalBounds())) {
+                // 뱀 머리와 먹이의 충돌을 검사
+                if (prey.type == "apple") {  // 사과 먹이를 먹으면
+                    score += 1;  // 점수 증가
+                    sf::Sprite newSegment(snakeBodyTexture);  // 새로운 몸통 생성
+                    if (!snakeBody.empty()) newSegment.setPosition(snakeBody.back().getPosition());  // 몸통 뒤에 위치
+                    else newSegment.setPosition(snakeHead.getPosition());  // 처음엔 머리 위치에 몸통 추가
+                    snakeBody.push_back(newSegment);  // 뱀 몸통에 새로 생성된 몸통 추가
+                }
+                else if (prey.type == "chick") {  // 병아리 먹이를 먹으면
+                    score += 1;  // 점수 증가
+                    if (!snakeBody.empty()) snakeBody.pop_back();  // 뱀 몸통 길이 하나 줄이기
+                }
+                else if (prey.type == "mouse") {  // 쥐 먹이를 먹으면
+                    score += 2;  // 점수 2점 증가
+                    sf::Sprite newSegment1(snakeBodyTexture), newSegment2(snakeBodyTexture);
+                    // 몸통 두 개 추가
+                    if (!snakeBody.empty()) {
+                        newSegment1.setPosition(snakeBody.back().getPosition());
+                        newSegment2.setPosition(snakeBody.back().getPosition());
+                    }
+                    else {
+                        newSegment1.setPosition(snakeHead.getPosition());
+                        newSegment2.setPosition(snakeHead.getPosition());
+                    }
+                    snakeBody.push_back(newSegment1);  // 몸통 두 개 추가
+                    snakeBody.push_back(newSegment2);
+                }
+
+                // 새로운 먹이 랜덤 위치에 설정
+                prey.sprite.setPosition(RandomPosition());  // 새 위치로 먹이 배치
+                int preyType = rand() % 3;  // 랜덤으로 먹이 종류 결정
+
+                if (preyType == 0) {
+                    prey.sprite.setTexture(appleTexture);  // 사과
+                    prey.type = "apple";
+                }
+                else if (preyType == 1) {
+                    prey.sprite.setTexture(chickTexture);  // 병아리
+                    prey.type = "chick";
+                }
+                else {
+                    prey.sprite.setTexture(mouseTexture);  // 쥐
+                    prey.type = "mouse";
+                }
+            }
+
+            // 특수 효과 시간 종료 시 속도 초기화
+            if (effectTimer <= 0.f) speed = Snake_Speed;  // 기본 속도로 리셋
         }
 
-        // 새로운 먹이 랜덤 위치에 설정
-        prey.sprite.setPosition(RandomPosition());  // 새 위치로 먹이 배치
-        int preyType = rand() % 3;  // 랜덤으로 먹이 종류 결정
-
-        if (preyType == 0) {
-            prey.sprite.setTexture(appleTexture);  // 사과
-            prey.type = "apple";
-        }
-        else if (preyType == 1) {
-            prey.sprite.setTexture(chickTexture);  // 병아리
-            prey.type = "chick";
-        }
-        else {
-            prey.sprite.setTexture(mouseTexture);  // 쥐
-            prey.type = "mouse";
-        }
         // 게임 화면 그리기
         window.clear();  // 화면 초기화
         window.draw(background);  // 배경 그리기
@@ -151,4 +210,6 @@ void startGame() {
         window.draw(prey.sprite);  // 먹이 그리기
         window.display();  // 화면에 모든 객체 출력
     }
-}
+
+    return;  // 프로그램 종료
+}//startGame()
