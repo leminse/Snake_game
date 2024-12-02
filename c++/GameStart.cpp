@@ -3,9 +3,9 @@
 #include <string>
 #include <deque>				//컨테이너를 사용해 뱀의 몸통 관리
 
-const float Snake_Speed = 25.f;			// 기본 뱀 이동 속도
-const float Chick_Speed = 20.f;			//병아리 섭취 시 속도 (빠름)
-const float Mouse_Speed = 30.f;			//쥐 섭취 시 속도 (느림)
+const float Snake_Speed = 50.f;			// 기본 뱀 이동 속도
+const float Chick_Speed = 35.f;			//병아리 섭취 시 속도 (빠름)
+const float Mouse_Speed = 65.f;			//쥐 섭취 시 속도 (느림)
 const sf::Vector2f GRID_SIZE(25.f, 25.f); // 그리드 크기 (뱀 및 먹이 정렬을 위한 기준) 25 * 25 픽셀 크기
 /*그리드란, 게임 화면을 작은 사각형들로 나누어 각 객체(뱀, 먹이 등)가
 정확히 해당 사각형의 경계선에 맞춰 배치되도록 정렬하는 방식을 의미 */
@@ -133,6 +133,14 @@ void startGame() {
             if (nextPosition.x < 0 || nextPosition.x >= width || nextPosition.y < 0 || nextPosition.y >= height) {
                 gameover = true;  // 벽에 닿으면 게임 종료
                 continue;  // 나머지 코드 실행을 건너뛰고 게임 오버 처리
+            }
+
+            // 뱀이 자기 몸에 충돌했을 때 게임 오버 처리
+            for (const auto& segment : snakeBody) {
+                if (segment.getPosition() == nextPosition) {  // 뱀의 몸통과 머리가 충돌
+                    gameover = true;  // 자기 몸에 닿으면 게임 종료
+                    continue;
+                }
             }
 
             // 뱀 몸통 업데이트 (몸통이 추가되면 앞에 추가, 끝은 삭제)
