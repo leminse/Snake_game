@@ -129,6 +129,12 @@ void startGame() {
             if (direction == LEFT) nextPosition.x -= GRID_SIZE.x; // 왼쪽으로 이동
             if (direction == RIGHT) nextPosition.x += GRID_SIZE.x; // 오른쪽으로 이동
 
+            // 벽에 충돌했을 때 게임 오버 처리
+            if (nextPosition.x < 0 || nextPosition.x >= width || nextPosition.y < 0 || nextPosition.y >= height) {
+                gameover = true;  // 벽에 닿으면 게임 종료
+                continue;  // 나머지 코드 실행을 건너뛰고 게임 오버 처리
+            }
+
             // 뱀 몸통 업데이트 (몸통이 추가되면 앞에 추가, 끝은 삭제)
             if (!snakeBody.empty()) {
                 snakeBody.push_front(snakeHead);  // 뱀 머리를 몸통 앞에 추가
