@@ -3,10 +3,10 @@
 #include <string>
 #include <deque>				//컨테이너를 사용해 뱀의 몸통 관리
 
-const float Snake_Speed = 50.f;			// 기본 뱀 이동 속도
-const float Chick_Speed = 35.f;			//병아리 섭취 시 속도 (빠름)
-const float Mouse_Speed = 65.f;			//쥐 섭취 시 속도 (느림)
-const sf::Vector2f GRID_SIZE(30.f, 30.f); // 그리드 크기 (뱀 및 먹이 정렬을 위한 기준) 25 * 25 픽셀 크기
+const float Snake_Speed = 25.f;			// 기본 뱀 이동 속도
+const float Chick_Speed = 20.f;			//병아리 섭취 시 속도 (빠름)
+const float Mouse_Speed = 30.f;			//쥐 섭취 시 속도 (느림)
+const sf::Vector2f GRID_SIZE(25.f, 25.f); // 그리드 크기 (뱀 및 먹이 정렬을 위한 기준) 25 * 25 픽셀 크기
 /*그리드란, 게임 화면을 작은 사각형들로 나누어 각 객체(뱀, 먹이 등)가
 정확히 해당 사각형의 경계선에 맞춰 배치되도록 정렬하는 방식을 의미 */
 const int width = 906;					// 게임 화면의 너비 
@@ -96,6 +96,23 @@ void startGame() {
             }
         }
 
+        if (gameover) {			// 게임 오버일 경우
+            window.clear();		//새로 그리기 전에 화면을 지워서 초기화
+            // 게임 오버 텍스트
+            sf::Text gameOverText("Game Over!", font, 40);
+            gameOverText.setFillColor(sf::Color::White);
+            gameOverText.setPosition(width / 2.f - 100, 561);
+
+            sf::Text gameOverScoreText("score : " + std::to_string(score), font, 40);
+            gameOverScoreText.setFillColor(sf::Color::White);
+            gameOverScoreText.setPosition(width / 2.f - 100, 600);
+
+            window.draw(gameOverText);
+            window.draw(gameOverScoreText);
+            window.display();
+            continue;  // 게임 오버 시 루프의 나머지 코드를 건너뛰고 새로 시작
+        }//gameover
+
         float deltaTime = clock.restart().asSeconds();  // clock.restart(): 시계를 재설정하고, 이전 시점부터의 경과 시간을 초 단위로 반환.
         timer += deltaTime;  // 게임의 이동 타이머를 업데이트하기 위한 코드. 뱀이 주어진 속도로 이동할 수 있도록 프레임 간의 시간을 측정
         if (effectTimer > 0.f) effectTimer -= deltaTime;  // 특수 효과 타이머 감소
@@ -175,7 +192,7 @@ void startGame() {
 
             // 특수 효과 시간 종료 시 속도 초기화
             if (effectTimer <= 0.f) speed = Snake_Speed;  // 기본 속도로 리셋
-        }// while
+        }
 
         // 게임 화면 그리기
         window.clear();  // 화면 초기화
