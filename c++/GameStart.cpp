@@ -110,12 +110,20 @@ void startGame() {
             // 뱀 머리와 먹이의 충돌을 검사
             if (prey.type == "apple") {  // 사과 먹이를 먹으면
                 score += 1;  // 점수 증가
+                sf::Sprite newSegment(snakeBodyTexture);  // 새로운 몸통 생성
+                if (!snakeBody.empty()) newSegment.setPosition(snakeBody.back().getPosition());  // 몸통 뒤에 위치
+                else newSegment.setPosition(snakeHead.getPosition());  // 처음엔 머리 위치에 몸통 추가
+                snakeBody.push_back(newSegment);  // 뱀 몸통에 새로 생성된 몸통 추가
             }
             else if (prey.type == "chick") {  // 병아리 먹이를 먹으면
                 score += 1;  // 점수 증가
             }
             else if (prey.type == "mouse") {  // 쥐 먹이를 먹으면
                 score += 2;  // 점수 2점 증가
+                sf::Sprite newSegment(snakeBodyTexture);  // 새로운 몸통 생성
+                if (!snakeBody.empty()) newSegment.setPosition(snakeBody.back().getPosition());  // 몸통 뒤에 위치
+                else newSegment.setPosition(snakeHead.getPosition());  // 처음엔 머리 위치에 몸통 추가
+                snakeBody.push_back(newSegment);  // 뱀 몸통에 새로 생성된 몸통 추가
             }
         }
 
