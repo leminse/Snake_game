@@ -1,56 +1,80 @@
 #include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>    
+#include <SFML/Window.hpp>
+
+
+void startGame();         // 게임 시작 함수
+void showDescription();   // 게임 설명 함수
 
 int main() {
-    // 창 크기 설정: 800x600 크기의 윈도우 창 생성, 창 제목 : Snake Game
-    sf::RenderWindow window(sf::VideoMode(606, 495), "Snake Game");
+    sf::RenderWindow window(sf::VideoMode(906, 795), "Snake Game");
 
-    // 배경 이미지 로드
     sf::Texture backgroundTexture;
-    if (!backgroundTexture.loadFromFile("C:/Users/lmslh/source/repos/c++/images/처음화면.png")) {
-        return -1;  // 배경 이미지 파일을 찾지 못하면 프로그램 종료
+    if (!backgroundTexture.loadFromFile("C:/Users/lmslh/source/repos/c++/images/처음 화면.png")) {
+        return -1;
     }
-    
-    sf::Sprite backgroundSprite(backgroundTexture);  // 스프라이트로 변환하여 화면에 출력
+    sf::Sprite backgroundSprite(backgroundTexture);             // 배경을 그릴 스프라이트 객체
 
     sf::Font font;
     if (!font.loadFromFile("C:/Users/lmslh/source/repos/c++/font_/yangjinche.otf")) {
-        return -1;  // 폰트 파일을 찾지 못하면 프로그램 종료
+        return -1;
     }
+                    
+    // 시작 버튼 생성
+    sf::RectangleShape startButton(sf::Vector2f(250, 60));          //버튼 크기
+    startButton.setFillColor(sf::Color(92, 112, 94));               //색상
+    startButton.setPosition(340, 470);                              //위치
 
-    // Play 버튼
-    sf::Text playButton("Play", font, 30);                  // 폰트, 크기 30
-    playButton.setPosition(270, 270);                       // "Play" 버튼의 위치 설정 (x=350, y=300)
-    playButton.setFillColor(sf::Color::Black);              // 텍스트 색상을 검정색으로 설정
+    // 시작 버튼 텍스트
+    sf::Text startButtonText(L"게임 시작", font, 40);
+    startButtonText.setFillColor(sf::Color::White);
+    startButtonText.setPosition(390, 475);
 
-    // 게임 방법 버튼 
-    sf::Text instructionsButton(L"게임 방법", font, 30);     // 폰트, 크기 30
-    instructionsButton.setPosition(270, 340);               // "게임 방법" 버튼의 위치 설정 (x=300, y=400)
-    instructionsButton.setFillColor(sf::Color::Black    );      // 텍스트 색상을 검정색으로 설정
+    // 게임 설명 버튼 생성
+    sf::RectangleShape instructionsButton(sf::Vector2f(250, 60));
+    instructionsButton.setFillColor(sf::Color(92, 112, 94));
+    instructionsButton.setPosition(340, 554);
 
-    // 창이 열려 있는 동안 실행되는 루프
+    // 게임 설명 버튼 텍스트
+    sf::Text instructionsButtonText(L"게임 방법", font, 40);
+    instructionsButtonText.setFillColor(sf::Color::White);
+    instructionsButtonText.setPosition(390, 561);
+
+    // 메인 루프: 창이 열려있는 동안 반복 실행
     while (window.isOpen()) {
-        sf::Event event;
-        // 이벤트가 발생했는지 확인하는 루프
-        while (window.pollEvent(event)) {
-            // 창을 닫는 이벤트가 발생하면 창을 닫음
+        sf::Event event;                                        // 이벤트 객체 생성
+        while (window.pollEvent(event)) {                       // 발생한 이벤트를 큐에서 가져와 처리
             if (event.type == sf::Event::Closed)
-                window.close();
+                window.close();                                 // 창 닫기 이벤트 발생 시 창을 닫음
+
+            // 마우스 클릭 이벤트 처리
+            if (event.type == sf::Event::MouseButtonPressed) {
+                if (event.mouseButton.button == sf::Mouse::Left) { // 마우스 왼쪽 버튼 클릭
+                    sf::Vector2i mousePos = sf::Mouse::getPosition(window); // 클릭한 마우스 위치 가져오기
+
+                    // 시작 버튼 클릭 여부 확인
+                    if (startButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                        window.close(); // 창 닫기
+                        startGame();    // 게임 시작 함수 호출
+                    }
+
+                    // 게임 설명 버튼 클릭 여부 확인
+                    if (instructionsButton.getGlobalBounds().contains(mousePos.x, mousePos.y)) {
+                        window.close(); // 창 닫기
+                        showDescription(); // 게임 설명 함수 호출
+                    }
+                }
+            }
         }
 
-        // 화면을 새로 그리기 전에 배경 이미지 그리기
-        window.clear();  // 배경을 지운 후
-
-        // 배경 이미지를 화면에 그리기
-        window.draw(backgroundSprite);
-        
-        // 텍스트 및 버튼을 창에 그리기
-        window.draw(playButton);           // Play 버튼
-        window.draw(instructionsButton);   // 게임 방법 버튼
-
-        // 화면에 그린 모든 것을 출력
-        window.display();
+        // 화면 그리기
+        window.clear();                   // 창을 깨끗이 지움
+        window.draw(backgroundSprite);    // 배경 이미지 그리기
+        window.draw(startButton);         // 시작 버튼 그리기
+        window.draw(startButtonText);     // 시작 버튼 텍스트 그리기
+        window.draw(instructionsButton);  // 설명 버튼 그리기
+        window.draw(instructionsButtonText); // 설명 버튼 텍스트 그리기
+        window.display();                 // 화면 업데이트
     }
 
-    return 0;  // 프로그램 종료
+    return 0; // 프로그램 종료
 }
